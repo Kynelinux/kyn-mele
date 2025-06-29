@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,11 +19,14 @@
       padding: 8px;
       vertical-align: top;
     }
-    .black-bar {
-      background: black;
-      height: 5px;
-      padding: 0;
-      border: none;
+    thead {
+      background-color: #222;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #111;
+    }
+    tbody tr:nth-child(odd) {
+      background-color: #1c1c1c;
     }
     td img {
       max-height: 40px;
@@ -37,7 +41,7 @@
     fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRPeOHz_lYh0s1_ZoiQ5ruNz2wYBPFqDiCXbxzUqgDb5qsd6ZSBws4_xqCKfbhkxTEujqOy1vKrgGHE/pub?gid=961208828&single=true&output=csv")
       .then(response => response.text())
       .then(data => {
-        const rows = data.split("\n").map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, "").replace(/""/g, '"')));
+        const rows = data.split("\n").map(row => row.split(/,(?=(?:(?:[^\"]*\"){2})*[^\"]*$)/).map(cell => cell.replace(/^"|"$/g, "").replace(/""/g, '"')));
         let tableHTML = "<table><thead><tr>";
 
         rows[0].forEach(header => {
@@ -48,13 +52,10 @@
 
         for (let i = 1; i < rows.length; i++) {
           const row = rows[i];
-          if (row.every(cell => cell.trim() === "")) {
-            tableHTML += `<tr><td class="black-bar" colspan="${rows[0].length}"></td></tr>`;
-            continue;
-          }
+          if (row.every(cell => cell.trim() === "")) continue;
 
           tableHTML += "<tr>";
-          row.forEach((cell, colIdx) => {
+          row.forEach(cell => {
             const isImage = cell.startsWith("http") && (cell.endsWith(".png") || cell.endsWith(".jpg") || cell.endsWith(".jpeg") || cell.endsWith(".webp"));
             tableHTML += `<td>${isImage ? `<img src="${cell}" />` : cell}</td>`;
           });
