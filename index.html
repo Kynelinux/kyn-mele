@@ -6,30 +6,34 @@
   <meta charset="UTF-8" />
   <style>
     body {
-      background-color: #111;
-      color: white;
+      background-color: #121212;
+      color: #f1f1f1;
       font-family: Arial, sans-serif;
       padding: 20px;
     }
+    h1 {
+      text-align: center;
+      color: white;
+    }
     table {
-      border-collapse: collapse;
       width: 100%;
-      background-color: #1e1e1e;
+      border-collapse: collapse;
+      margin: auto;
     }
     th, td {
-      border: 1px solid #444;
+      border: 1px solid #333;
       padding: 10px;
       text-align: center;
       vertical-align: middle;
     }
     th {
-      background-color: #333;
+      background-color: #1f1f1f;
+    }
+    tr:nth-child(even) {
+      background-color: #1a1a1a;
     }
     img {
       max-height: 40px;
-    }
-    tr:nth-child(even) {
-      background-color: #242424;
     }
   </style>
 </head>
@@ -41,25 +45,25 @@
     fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRPeOHz_lYh0s1_ZoiQ5ruNz2wYBPFqDiCXbxzUqgDb5qsd6ZSBws4_xqCKfbhkxTEujqOy1vKrgGHE/pub?gid=961208828&single=true&output=csv")
       .then(response => response.text())
       .then(data => {
-        const rows = data.split("\n").map(row => row.split(","));
+        const rows = data.trim().split("\n").map(row => row.split(","));
         let tableHTML = "<table><thead><tr>";
-
-        // Limit headers to exclude the second Attributes column
-        const headers = rows[0].slice(0, -1);
-        headers.forEach(header => {
+        rows[0].forEach(header => {
           tableHTML += `<th>${header}</th>`;
         });
-
         tableHTML += "</tr></thead><tbody>";
 
         for (let i = 1; i < rows.length; i++) {
           const row = rows[i];
           if (row.every(cell => cell.trim() === "")) continue;
-
           tableHTML += "<tr>";
-          for (let j = 0; j < headers.length; j++) {
-            tableHTML += `<td>${row[j] || ""}</td>`;
-          }
+          row.forEach((cell, index) => {
+            // Convert image links to actual images in the first column
+            if (index === 0 && cell.startsWith("http")) {
+              tableHTML += `<td><img src="${cell}" alt="img" /></td>`;
+            } else {
+              tableHTML += `<td>${cell}</td>`;
+            }
+          });
           tableHTML += "</tr>";
         }
 
@@ -67,7 +71,7 @@
         document.getElementById("table-container").innerHTML = tableHTML;
       })
       .catch(error => {
-        document.getElementById("table-container").innerHTML = "Error loading data";
+        document.getElementById("table-container").innerHTML = "Error loading data.";
         console.error("CSV fetch error:", error);
       });
   </script>
