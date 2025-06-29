@@ -11,30 +11,25 @@
       font-family: Arial, sans-serif;
       padding: 20px;
     }
-    h1 {
-      text-align: center;
-    }
     table {
-      width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      width: 100%;
+      background-color: #1e1e1e;
     }
     th, td {
       border: 1px solid #444;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
+      vertical-align: middle;
     }
     th {
-      background-color: #222;
+      background-color: #333;
     }
     img {
       max-height: 40px;
     }
-    .black-bar {
-      background: black;
-      height: 5px;
-      padding: 0;
-      border: none;
+    tr:nth-child(even) {
+      background-color: #242424;
     }
   </style>
 </head>
@@ -49,27 +44,23 @@
         const rows = data.split("\n").map(row => row.split(","));
         let tableHTML = "<table><thead><tr>";
 
-        const header = rows[0];
-        const baseColumns = 9;  // First 9 columns are standard
-        for (let i = 0; i < baseColumns; i++) {
-          tableHTML += `<th>${header[i]}</th>`;
-        }
-        tableHTML += "<th>Attributes</th></tr></thead><tbody>";
+        // Limit headers to exclude the second Attributes column
+        const headers = rows[0].slice(0, -1);
+        headers.forEach(header => {
+          tableHTML += `<th>${header}</th>`;
+        });
+
+        tableHTML += "</tr></thead><tbody>";
 
         for (let i = 1; i < rows.length; i++) {
           const row = rows[i];
           if (row.every(cell => cell.trim() === "")) continue;
+
           tableHTML += "<tr>";
-          for (let j = 0; j < baseColumns; j++) {
-            let cell = row[j] || "";
-            if (j === 0 && cell.startsWith("http")) {
-              tableHTML += `<td><img src="${cell}" alt="icon" /></td>`;
-            } else {
-              tableHTML += `<td>${cell}</td>`;
-            }
+          for (let j = 0; j < headers.length; j++) {
+            tableHTML += `<td>${row[j] || ""}</td>`;
           }
-          const attributes = row.slice(baseColumns).filter(cell => cell.trim() !== "").join(", ");
-          tableHTML += `<td>${attributes}</td></tr>`;
+          tableHTML += "</tr>";
         }
 
         tableHTML += "</tbody></table>";
