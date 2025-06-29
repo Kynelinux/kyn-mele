@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,33 +5,26 @@
   <meta charset="UTF-8" />
   <style>
     body {
-      background-color: #121212;
-      color: #f1f1f1;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
+      background-color: black;
       color: white;
+      font-family: sans-serif;
     }
     table {
-      width: 100%;
       border-collapse: collapse;
-      margin: auto;
+      width: 100%;
     }
     th, td {
-      border: 1px solid #333;
-      padding: 10px;
-      text-align: center;
-      vertical-align: middle;
+      border: 1px solid #ccc;
+      padding: 8px;
+      vertical-align: top;
     }
-    th {
-      background-color: #1f1f1f;
+    .black-bar {
+      background: black;
+      height: 5px;
+      padding: 0;
+      border: none;
     }
-    tr:nth-child(even) {
-      background-color: #1a1a1a;
-    }
-    img {
+    td img {
       max-height: 40px;
     }
   </style>
@@ -45,24 +37,26 @@
     fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRPeOHz_lYh0s1_ZoiQ5ruNz2wYBPFqDiCXbxzUqgDb5qsd6ZSBws4_xqCKfbhkxTEujqOy1vKrgGHE/pub?gid=961208828&single=true&output=csv")
       .then(response => response.text())
       .then(data => {
-        const rows = data.trim().split("\n").map(row => row.split(","));
+        const rows = data.split("\n").map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, "").replace(/""/g, '"')));
         let tableHTML = "<table><thead><tr>";
+
         rows[0].forEach(header => {
           tableHTML += `<th>${header}</th>`;
         });
+
         tableHTML += "</tr></thead><tbody>";
 
         for (let i = 1; i < rows.length; i++) {
           const row = rows[i];
-          if (row.every(cell => cell.trim() === "")) continue;
+          if (row.every(cell => cell.trim() === "")) {
+            tableHTML += `<tr><td class="black-bar" colspan="${rows[0].length}"></td></tr>`;
+            continue;
+          }
+
           tableHTML += "<tr>";
-          row.forEach((cell, index) => {
-            // Convert image links to actual images in the first column
-            if (index === 0 && cell.startsWith("http")) {
-              tableHTML += `<td><img src="${cell}" alt="img" /></td>`;
-            } else {
-              tableHTML += `<td>${cell}</td>`;
-            }
+          row.forEach((cell, colIdx) => {
+            const isImage = cell.startsWith("http") && (cell.endsWith(".png") || cell.endsWith(".jpg") || cell.endsWith(".jpeg") || cell.endsWith(".webp"));
+            tableHTML += `<td>${isImage ? `<img src="${cell}" />` : cell}</td>`;
           });
           tableHTML += "</tr>";
         }
@@ -71,7 +65,7 @@
         document.getElementById("table-container").innerHTML = tableHTML;
       })
       .catch(error => {
-        document.getElementById("table-container").innerHTML = "Error loading data.";
+        document.getElementById("table-container").innerHTML = "Error loading data";
         console.error("CSV fetch error:", error);
       });
   </script>
